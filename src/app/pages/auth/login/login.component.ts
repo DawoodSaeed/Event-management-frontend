@@ -66,9 +66,11 @@ export class LoginComponent {
 
     if (email && password) {
       this.authService.login({ email, password }).subscribe({
-        next: () => {
+        next: (res) => {
+          this.authService.storeToken(res.token);
+          this.authService.storeUser(res);
           this.toastr.success('Login Was successful', 'Success');
-          this.router.navigate(['/register']);
+          this.router.navigate([`${res.role}/dashboard`]);
         },
         error: (err) => {
           this.toastr.error(
