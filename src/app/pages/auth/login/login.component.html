@@ -1,0 +1,131 @@
+<div class="flex min-h-screen">
+  <!-- Left Panel -->
+  <div
+    class="w-1/2 bg-cover bg-center relative hidden lg:block"
+    style="background-image: url('/assets/images/login-bg.svg')"
+  >
+    <div class="absolute inset-0 bg-black opacity-50"></div>
+    <div
+      class="absolute inset-0 flex flex-col items-center justify-center text-white px-6"
+    >
+      <h1 class="text-3xl font-bold">Welcome back</h1>
+      <p class="mt-2 text-lg text-gray-300">
+        To keep connected with us provide us with your information
+      </p>
+      <button
+        routerLink="/register"
+        class="mt-4 p-button-outlined bg-gray-100 regitserBtn"
+      >
+        Register
+      </button>
+    </div>
+  </div>
+
+  <!-- Right Panel -->
+  <div
+    class="w-full lg:w-1/2 flex items-center justify-center bg-gray-100 px-8 py-12"
+  >
+    <div class="p-8 w-full max-w-md">
+      <h2 class="text-2xl font-bold text-center mb-6">
+        <span class="text-gray-900">Event</span>
+        <span class="text-purple-600"> Hive</span>
+      </h2>
+      <h3 class="text-xl font-semibold text-center mb-4">
+        Sign In to Event Hive
+      </h3>
+
+      <form (ngSubmit)="onSignin()" [formGroup]="authForm">
+        <!-- Email Field -->
+        <div class="mb-4">
+          <label class="block text-sm font-medium"> Email</label>
+          <input
+            type="text"
+            formControlName="email"
+            placeholder="Enter your email"
+            class="w-full"
+            pInputText
+            required
+          />
+          <ng-container *ngIf="authForm.get('email') as email">
+            <div *ngIf="email.touched && email.invalid">
+              <p-message
+                severity="error"
+                icon="pi pi-times-circle"
+                styleClass="mt-2"
+                *ngIf="email.hasError('required')"
+                >Email is required</p-message
+              >
+              <p-message
+                severity="error"
+                icon="pi pi-times-circle"
+                styleClass="mt-2"
+                *ngIf="email.hasError('email')"
+                >Invalid email format</p-message
+              >
+              <p-message
+                severity="error"
+                icon="pi pi-times-circle"
+                styleClass="mt-2"
+                *ngIf="email.hasError('minlength')"
+                >Email must be at least 4 characters long</p-message
+              >
+              <p-message
+                severity="error"
+                icon="pi pi-times-circle"
+                styleClass="mt-2"
+                *ngIf="email.hasError('maxlength')"
+                >Email cannot exceed 50 characters</p-message
+              >
+            </div>
+          </ng-container>
+        </div>
+
+        <!-- Password Field -->
+        <div class="mb-4">
+          <label class="block text-sm font-medium">Password</label>
+          <input
+            type="password"
+            formControlName="password"
+            placeholder="Enter your password"
+            class="w-full"
+            pInputText
+            required
+          />
+          <ng-container *ngIf="authForm.get('password') as password">
+            <div *ngIf="password.touched && password.invalid">
+              <p-message
+                severity="error"
+                icon="pi pi-times-circle"
+                styleClass="mt-2"
+                *ngIf="password.hasError('required')"
+                >Password is required</p-message
+              >
+              <p-message
+                severity="error"
+                icon="pi pi-times-circle"
+                styleClass="mt-2"
+                *ngIf="password.hasError('minlength')"
+                >Password must be at least 4 characters long</p-message
+              >
+              <p-message
+                severity="error"
+                icon="pi pi-times-circle"
+                styleClass="mt-2"
+                *ngIf="password.hasError('maxlength')"
+                >Password cannot exceed 20 characters</p-message
+              >
+            </div>
+          </ng-container>
+        </div>
+
+        <!-- Submit Button -->
+        <button
+          pButton
+          type="submit"
+          label="Sign In"
+          class="w-full p-button-primary"
+        ></button>
+      </form>
+    </div>
+  </div>
+</div>
