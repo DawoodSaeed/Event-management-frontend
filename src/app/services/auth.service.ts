@@ -24,7 +24,7 @@ export class AuthService {
   private tokenKey = 'authToken';
   private userKey = 'authUser';
 
-  private userSubject = new BehaviorSubject<any>(null);
+  private userSubject = new BehaviorSubject<User | null>(null);
 
   constructor(private http: HttpClient, private router: Router) {
     this.loadUserFromStorage();
@@ -61,7 +61,7 @@ export class AuthService {
     this.userSubject.next(user);
   }
 
-  getUser(): Observable<any> {
+  getUser(): Observable<User | null> {
     return this.userSubject.asObservable();
   }
 
