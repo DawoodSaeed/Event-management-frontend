@@ -1,0 +1,122 @@
+<div class="container mx-auto">
+  <div class="flex justify-between px-6 h-15 items-center">
+    <div>
+      <h2 class="text-2xl font-bold text-center">
+        <span class="text-gray-900">Event</span>
+        <span class="text-purple-600"> Hive</span>
+      </h2>
+    </div>
+
+    <div class="flex items-center space-x-10">
+      <!-- Dashboard Link -->
+      <p routerLink="/user/dashboard">Dashboard</p>
+
+      <p routerLink="/user/my-invitations" class="active-link">
+        My Inivitations
+      </p>
+
+      <!-- My Events Link -->
+      <p routerLink="/user/my-events">My Events</p>
+
+      <!-- Logout Button -->
+      <p-button
+        label="Logout"
+        icon="pi pi-sign-out"
+        (click)="logout()"
+      ></p-button>
+    </div>
+  </div>
+
+  <div
+    style="background-image: url('/assets/images/dashboard-bg.svg')"
+    class="bg-cover bg-center h-120 w-full rounded-xl p-4 md:p-6 lg:p-8 relative"
+  >
+    <h1
+      class="text-white text-4xl md:text-5xl lg:text-6xl uppercase font-bold text-center mx-auto"
+    >
+      Made for those who do
+    </h1>
+  </div>
+
+  <div class="p-6">
+    <h2 class="text-2xl font-bold">
+      <span class="text-gray-900">My </span>
+      <span class="text-purple-600"> Inivitations</span>
+    </h2>
+
+    @let invitations = invitations$ | async; @if(invitations){
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div
+        *ngFor="let invitation of invitations"
+        class="p-card p-4 bg-white shadow-lg rounded-lg"
+      >
+        <h3 class="text-lg font-semibold">
+          {{ invitation.eventId?.title || "Unknown Event" }}
+        </h3>
+        <p class="text-sm text-gray-500">
+          Location: {{ invitation.eventId?.location || "N/A" }}
+        </p>
+        <p class="text-sm text-gray-500">
+          Date:
+          {{
+            invitation.eventId?.date ? (invitation.eventId?.date | date) : "N/A"
+          }}
+        </p>
+
+        <div class="mt-4 flex space-x-2">
+          <p-button
+            *ngIf="invitation.eventId"
+            label="Join"
+            icon="pi pi-check"
+            (click)="acceptInvitation(invitation._id)"
+          >
+          </p-button>
+
+          <p-button
+            label="Decline"
+            icon="pi pi-times"
+            styleClass="p-button-danger"
+            (click)="declineInvitation(invitation._id)"
+          >
+          </p-button>
+        </div>
+      </div>
+    </div>
+    }@else {
+    <div class="text-gray-500">No invitations found.</div>
+    }
+
+    <!-- Joined Events -->
+    <div class="mt-10">
+      <h2 class="text-2xl font-bold">
+        <span class="text-gray-900">Joined </span>
+        <span class="text-purple-600"> Events</span>
+      </h2>
+
+      @let joinedEvents = joinedEvents$ | async; @if(joinedEvents){
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div
+          *ngFor="let event of joinedEvents"
+          class="p-card p-4 bg-white shadow-lg rounded-lg"
+        >
+          <h3 class="text-lg font-semibold">
+            {{ event.eventId?.title || "Unknown Event" }}
+          </h3>
+          <p class="text-sm text-gray-500">
+            Location: {{ event.eventId?.location || "N/A" }}
+          </p>
+          <p class="text-sm text-gray-500">
+            Date:
+            {{ event.eventId?.date ? (event.eventId?.date | date) : "N/A" }}
+          </p>
+        </div>
+      </div>
+      }@else {
+      <div class="text-gray-500">You haven't joined any events yet.</div>
+
+      }
+    </div>
+  </div>
+</div>
