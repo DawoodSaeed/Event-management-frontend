@@ -14,6 +14,8 @@ export interface Event {
   createdAt: string; // ISO date string
   updatedAt: string; // ISO date string
   __v: number;
+  hasJoined?: boolean;
+  approving?: boolean;
 }
 
 export interface EventListResponse {
@@ -93,6 +95,7 @@ export class EventService {
   }
 
   joinEvent(eventId: string) {
+    alert(eventId);
     return this.http.post(`${this.apiUrl}/participants/join`, { eventId });
   }
 
@@ -114,11 +117,37 @@ export class EventService {
     );
   }
 
+  // #################### ADMIN ####################
   // Approve an event (admin only)
-  approveEvent(eventId: string): Observable<{ message: string }> {
+  approveEventForAdmin(eventId: string): Observable<{ message: string }> {
     return this.http.put<{ message: string }>(
       `${this.apiUrl}/events/${eventId}/approve`,
       {}
+    );
+  }
+
+  //  Fetch pending events for admin
+  getPendingEventsForAdmin(): Observable<{ events: Event[] }> {
+    return this.http.get<{ events: Event[] }>(
+      `${this.apiUrl}/events/admin/pending-events`
+    );
+  }
+
+  // ✅ Edit event
+  editEventForAdmin(
+    eventId: string,
+    updatedData: Partial<Event>
+  ): Observable<{ message: string }> {
+    return this.http.put<{ message: string }>(
+      `${this.apiUrl}/events/${eventId}/admin-edit`,
+      updatedData
+    );
+  }
+
+  // ✅ Delete event
+  deleteEventForAdmin(eventId: string): Observable<{ message: string }> {
+    return this.http.delete<{ message: string }>(
+      `${this.apiUrl}/events/${eventId}/admin-delete`
     );
   }
 }

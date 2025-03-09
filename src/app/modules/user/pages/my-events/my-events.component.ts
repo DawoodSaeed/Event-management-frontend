@@ -20,19 +20,29 @@ import { Calendar } from 'primeng/calendar';
 import { AuthService } from '../../../../services/auth.service';
 import {
   BehaviorSubject,
+  catchError,
   combineLatest,
   debounceTime,
+  from,
+  mergeMap,
   map,
   Observable,
   pairwise,
   scan,
+  shareReplay,
   startWith,
   switchMap,
+  take,
   tap,
   withLatestFrom,
+  of,
+  finalize,
 } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
 import { EventParams } from '../../../../models/event.model';
+import { MultiSelect } from 'primeng/multiselect';
+import { UserService, User } from '../../../../services/user.service';
+import { ParticipantService } from '../../../../services/participant.service';
 interface EventResponse {
   events: EventI[];
   totalPages: number;
@@ -57,14 +67,20 @@ interface Accumulator {
     InputTextModule,
     Textarea,
     Calendar,
+    MultiSelect,
   ],
   templateUrl: './my-events.component.html',
   styleUrl: './my-events.component.css',
 })
 export class MyEventsComponent {
   events$!: Observable<EventI[]>;
+  participants = signal<User[]>([]);
+
+  private participantService = inject(ParticipantService);
   private eventService = inject(EventService);
   private authService = inject(AuthService);
+  private userService = inject(UserService);
+  private toastr = inject(ToastrService);
   params$ = new BehaviorSubject<EventParams>({
     limit: 6,
     page: 1,
@@ -84,6 +100,12 @@ export class MyEventsComponent {
   currentPage = signal(0);
   // Reactive form for editing events
   editEventForm: FormGroup;
+  participantsForm: FormGroup;
+  eventForm: FormGroup;
+  pariticipantFormVisible = signal(false);
+  selectedParticipants: any[] = [];
+  visible: boolean = false;
+  users$!: Observable<User[]>;
 
   constructor() {
     this.editEventForm = this.fb.group({
@@ -91,10 +113,45 @@ export class MyEventsComponent {
       description: ['', Validators.required],
       location: ['', Validators.required],
       date: ['', Validators.required],
+      participants: [[]],
     });
+
+    this.participantsForm = this.fb.group({
+      participants: [[]],
+    });
+
+    this.eventForm = this.fb.group({
+      title: ['', Validators.required],
+      description: ['', Validators.required],
+      location: ['', Validators.required],
+      date: ['', Validators.required],
+      participants: [[]],
+    });
+
+    this.users$ = this.userService
+      .getAllUsers()
+      .pipe(map((data) => data.users));
+
+    // Fetch all users and filter out participants
   }
 
   ngOnInit() {
+    this.userService
+      .getAllUsers()
+      .pipe(
+        take(1),
+        map((data) => data.users),
+        shareReplay()
+      )
+      .subscribe({
+        next: (data) => {
+          this.participants.set(data);
+        },
+        error: (error) => {
+          this.toastrService.error('Error fetching participants', 'Error');
+        },
+      });
+
     this.events$ = combineLatest([this.refreshSub$, this.params$]).pipe(
       debounceTime(300),
       startWith([false, {}] as [boolean, EventParams]),
@@ -307,5 +364,81 @@ export class MyEventsComponent {
 
   resetFilters() {
     this.params$.next({});
+  }
+
+  selectedEventId = signal('');
+  sendInvitations() {
+    if (parseInt(this.selectedEventId())) {
+      const users = this.participantsForm.get('participants')?.value as User[];
+
+      from(users)
+        .pipe(
+          mergeMap((user) =>
+            this.participantService.sendInvitation(
+              this.selectedEventId(),
+              user._id
+            )
+          ),
+          catchError((error) => {
+            this.toastr.error('Error sending invitation:', error.error.message);
+            return of(null);
+          }),
+          finalize(() => {
+            this.pariticipantFormVisible.set(false);
+          })
+        )
+        .subscribe();
+    }
+  }
+
+  // To create events; ###########
+  // create event #######################
+
+  // Open the dialog
+  showDialog() {
+    this.visible = true;
+  }
+
+  // Close the dialog
+  onDialogHide() {
+    this.visible = false;
+    this.eventForm.reset(); // Reset the form
+  }
+  // Reset the form
+
+  // Handle form submission
+  onCreateEvent() {
+    if (this.eventForm.invalid) {
+      // Mark all fields as touched to display validation errors
+      this.eventForm.markAllAsTouched();
+      return;
+    }
+
+    const eventData = {
+      ...this.eventForm.value,
+      participants: this.eventForm.value.participants.map(
+        (user: any) => user._id
+      ),
+    };
+
+    this.eventService.createEvent(eventData).subscribe({
+      next: (eventResponse) => {
+        this.toastr.success(
+          `Event: ${eventResponse.event.title} is created successfuly`,
+          'Event Created'
+        );
+        this.visible = false; // Close the dialog
+        this.eventForm.reset(); // Reset the form
+        this.params$.next({});
+      },
+      error: (err) => {
+        this.toastr.error(
+          "Event can't be created at the moment.",
+          'Event Creation Failed'
+        );
+      },
+    });
+
+    console.log(eventData);
   }
 }

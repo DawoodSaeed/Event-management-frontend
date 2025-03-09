@@ -161,9 +161,15 @@ export class DashboardComponent implements OnInit {
   //   }
   // }
 
-  joinEvent(event: any) {
-    this.eventService.joinEvent(event._id).subscribe(() => {
-      alert('Joined event successfully!');
+  joinEvent(eventId: string) {
+    this.eventService.joinEvent(eventId).subscribe({
+      next: () => {
+        this.toastr.success('Joined event successfully!');
+        this.params$.next({});
+      },
+      error: (error) => {
+        this.toastr.error('Failed to join event:', error.message);
+      },
     });
   }
 

@@ -54,4 +54,14 @@ export class ParticipantService {
       `${this.apiUrl}/participants/joined-events`
     );
   }
+
+  getEventParticipants(
+    eventId: string
+  ): Observable<{
+    participants: { userId: string; name: string; email: string }[];
+  }> {
+    return this.http.get<{
+      participants: { userId: string; name: string; email: string }[];
+    }>(`${this.apiUrl}/participants/${eventId}`);
+  }
 }

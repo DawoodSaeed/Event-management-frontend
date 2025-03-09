@@ -1,1 +1,198 @@
-<p>admin-dashboard works!</p>
+<div class="container mx-auto">
+  <div class="flex justify-between px-6 h-15 items-center">
+    <div>
+      <h2 class="text-2xl font-bold text-center">
+        <span class="text-gray-900">Event</span>
+        <span class="text-purple-600"> Hive</span>
+      </h2>
+    </div>
+
+    <div class="flex items-center space-x-5">
+      <!-- Logout Button -->
+      <p-button
+        label="Logout"
+        icon="pi pi-sign-out"
+        (click)="logout()"
+      ></p-button>
+    </div>
+  </div>
+  <div
+    style="background-image: url('/assets/images/dashboard-bg.svg')"
+    class="bg-cover bg-center h-120 w-full rounded-xl p-4 md:p-6 lg:p-8 relative"
+  >
+    <h1
+      class="text-white text-4xl md:text-5xl lg:text-6xl uppercase font-bold text-center mx-auto"
+    >
+      Made for those who do
+    </h1>
+  </div>
+  <h2 class="text-2xl font-bold mt-10">
+    <span class="text-gray-900">Admin - </span>
+    <span class="text-purple-600"> Manage Events</span>
+  </h2>
+  <p-table
+    [value]="events"
+    [loading]="loading"
+    responsiveLayout="scroll"
+    styleClass="p-datatable-gridlines"
+    stripedRows
+  >
+    <ng-template pTemplate="header">
+      <tr>
+        <th styleClass="text-left">Title</th>
+        <th styleClass="text-left">Location</th>
+        <th styleClass="text-left">Date</th>
+        <th styleClass="text-left">Status</th>
+        <th styleClass="text-left">Actions</th>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="body" let-event let-index="index">
+      <tr
+        [ngClass]="{
+          'bg-gray-200': index % 2 === 0,
+          'bg-gray-300': index % 2 !== 0
+        }"
+      >
+        <td>{{ event.title }}</td>
+        <td>{{ event.location }}</td>
+        <td>{{ event.date | date }}</td>
+        <td>
+          <span
+            class="px-2 py-1 rounded text-white font-semibold captilize"
+            [ngClass]="{
+              'bg-green-500': event.status === 'approved',
+              'bg-red-500': event.status === 'rejected',
+              'bg-yellow-500': event.status === 'pending'
+            }"
+          >
+            {{ event.status }}
+          </span>
+        </td>
+        <td class="space-x-5">
+          <p-button
+            label="Approve"
+            icon="pi pi-check"
+            (click)="approveEvent(event._id, event)"
+            *ngIf="event.status !== 'approved'"
+            styleClass="p-button-success p-button-sm"
+            [loading]="event.approving"
+          >
+          </p-button>
+
+          <p-button
+            label="Edit"
+            icon="pi pi-pencil"
+            (click)="openEditDialog(event)"
+            styleClass="p-button-info p-button-sm"
+          >
+          </p-button>
+
+          <p-button
+            label="Delete"
+            icon="pi pi-trash"
+            (click)="confirmDelete(event._id)"
+            styleClass="p-button-danger p-button-sm"
+          >
+          </p-button>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+
+  <!-- Edit Event Dialog -->
+  <p-dialog
+    [(visible)]="editDialogVisible"
+    header="Edit Event"
+    [modal]="true"
+    [closable]="false"
+    [style]="{ width: '90vw', maxWidth: '600px' }"
+    [modal]="true"
+    [responsive]="true"
+    [breakpoints]="{ '960px': '75vw', '640px': '90vw' }"
+  >
+    <form
+      [formGroup]="eventForm"
+      (ngSubmit)="saveEventChanges()"
+      class="space-y-4"
+    >
+      <div class="p-field flex flex-col">
+        <label for="title" class="text-sm font-medium text-gray-700"
+          >Title</label
+        >
+        <input
+          pInputText
+          formControlName="title"
+          id="title"
+          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+        />
+      </div>
+      <div class="p-field flex flex-col">
+        <label for="description" class="text-sm font-medium text-gray-700"
+          >Description</label
+        >
+        <textarea
+          pTextarea
+          formControlName="description"
+          id="description"
+          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+        ></textarea>
+      </div>
+      <div class="p-field flex flex-col">
+        <label for="location" class="text-sm font-medium text-gray-700"
+          >Location</label
+        >
+        <input
+          pInputText
+          formControlName="location"
+          id="location"
+          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+        />
+      </div>
+      <div class="p-field flex flex-col">
+        <label for="date" class="text-sm font-medium text-gray-700">Date</label>
+        <input
+          type="date"
+          pInputText
+          formControlName="date"
+          id="date"
+          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+        />
+      </div>
+
+      <div class="flex justify-end space-x-2 mt-4">
+        <p-button
+          label="Cancel"
+          icon="pi pi-times"
+          styleClass="p-button-secondary"
+          (click)="editDialogVisible = false"
+        ></p-button>
+        <p-button label="Save" icon="pi pi-save" type="submit"></p-button>
+      </div>
+    </form>
+  </p-dialog>
+
+  <p-confirmDialog></p-confirmDialog>
+
+  <p-dialog [(visible)]="deleteDialogVisible" [style]="{ width: '450px' }">
+    <p-header>Confirmation</p-header>
+    <p-message
+      severity="warn"
+      text="Are you sure you want to delete this event?"
+    ></p-message>
+    <p-footer>
+      <p-button
+        label="No"
+        icon="pi pi-times"
+        severity="secondary"
+        (click)="deleteDialogVisible = false"
+      ></p-button>
+      <p-button
+        label="Yes"
+        icon="pi pi-check"
+        severity="danger"
+        (click)="confirmDelete(selectedEvent!._id)"
+      ></p-button>
+    </p-footer>
+  </p-dialog>
+</div>

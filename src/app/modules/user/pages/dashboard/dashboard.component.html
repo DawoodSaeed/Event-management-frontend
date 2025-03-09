@@ -155,6 +155,8 @@
             <th pSortableColumn="status">
               Status <p-sortIcon field="status"></p-sortIcon>
             </th>
+
+            <th>Action <p-sortIcon field="action"></p-sortIcon></th>
           </tr>
         </ng-template>
 
@@ -165,6 +167,17 @@
             <td>{{ event.location }}</td>
             <td>{{ event.date | date : "medium" }}</td>
             <td>{{ event.status }}</td>
+
+            <td>
+              <button
+                [disabled]="event.hasJoined"
+                pButton
+                (click)="joinEvent(event._id)"
+                class="p-button-outlined p-button-sm px-4 py-2 rounded-lg"
+              >
+                {{ event.hasJoined ? "joined" : "join" }}
+              </button>
+            </td>
           </tr>
         </ng-template>
 
