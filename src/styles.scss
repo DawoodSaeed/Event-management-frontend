@@ -8,3 +8,10 @@
 * {
   font-family: Inter;
 }
+
+
+.active-link {
+  color: #7848f4; /* Purple color for active link */
+  font-weight: bold; /* Bold text for active link */
+  border-bottom: 2px solid #7848f4; /* Underline effect */
+}

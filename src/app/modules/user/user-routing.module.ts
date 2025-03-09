@@ -3,6 +3,7 @@ import { RouterModule, Routes } from '@angular/router';
 import { DashboardComponent } from './pages/dashboard/dashboard.component';
 import { ProfileComponent } from './pages/profile/profile.component';
 import { AuthGuard } from '../../guards/auth.guard';
+import { MyEventsComponent } from './pages/my-events/my-events.component';
 
 const routes: Routes = [
   {
@@ -14,6 +15,13 @@ const routes: Routes = [
   {
     path: 'profile',
     component: ProfileComponent,
+    canActivate: [AuthGuard],
+    data: { role: 'user' },
+  },
+
+  {
+    path: 'my-events',
+    component: MyEventsComponent,
     canActivate: [AuthGuard],
     data: { role: 'user' },
   },

@@ -7,19 +7,14 @@
       </h2>
     </div>
 
-    <div class="flex items-center space-x-5">
+    <div class="flex items-center space-x-10">
       <!-- Dashboard Link -->
-      <p routerLink="/user/dashboard" class="active-link">Dashboard</p>
+      <p routerLink="/user/dashboard">Dashboard</p>
 
       <!-- My Events Link -->
-      <p routerLink="/user/my-events">My Events</p>
-
-      <p-button
-        label="Create Event"
-        icon="pi pi-plus"
-        (click)="showDialog()"
-        styleClass="p-button-outlined"
-      ></p-button>
+      <p routerLink="/user/dashboard/my-events" class="active-link">
+        My Events
+      </p>
 
       <!-- Logout Button -->
       <p-button
@@ -121,135 +116,80 @@
     </div>
   </div>
 
-  <div class="p-4 md:p-6 lg:p-8">
-    @if (events$ | async; as events) {
-    <!-- Event List -->
-    <div class="overflow-x-auto mt-8">
-      <h2 class="text-2xl font-bold">
-        <span class="text-gray-900">Upcoming</span>
-        <span class="text-purple-600"> Events</span>
-      </h2>
+  @let events = events$ | async; @if(events){
+  <div class="p-6 mt-10">
+    <h2 class="text-2xl font-bold">
+      <span class="text-gray-900">My </span>
+      <span class="text-purple-600"> Events</span>
+    </h2>
 
-      <!-- PrimeNG Table -->
-      <p-table
-        [value]="events"
-        [paginator]="false"
-        [loading]="loading()"
-        [sortMode]="'multiple'"
-      >
-        <ng-template pTemplate="header">
-          <tr>
-            <th pSortableColumn="title">
-              Title <p-sortIcon field="title"></p-sortIcon>
-            </th>
-            <th pSortableColumn="description">
-              Description <p-sortIcon field="description"></p-sortIcon>
-            </th>
-            <th pSortableColumn="location">
-              Location <p-sortIcon field="location"></p-sortIcon>
-            </th>
-            <th pSortableColumn="date">
-              Date <p-sortIcon field="date"></p-sortIcon>
-            </th>
-            <th pSortableColumn="status">
-              Status <p-sortIcon field="status"></p-sortIcon>
-            </th>
-          </tr>
-        </ng-template>
-
-        <ng-template pTemplate="body" let-event>
-          <tr>
-            <td>{{ event.title }}</td>
-            <td>{{ event.description }}</td>
-            <td>{{ event.location }}</td>
-            <td>{{ event.date | date : "medium" }}</td>
-            <td>{{ event.status }}</td>
-          </tr>
-        </ng-template>
-
-        <ng-template pTemplate="emptymessage">
-          <tr>
-            <td colspan="5">No events found</td>
-          </tr>
-        </ng-template>
-      </p-table>
+    <div *ngIf="events.length === 0" class="text-gray-500">
+      No events created yet.
     </div>
 
-    <!-- Pagination -->
-    <div
-      class="flex flex-col sm:flex-row justify-between items-center mt-5 space-y-3 sm:space-y-0"
-    >
-      <!-- Showing current page / total pages -->
-      <span class="text-gray-600 text-sm">
-        Page <strong>{{ currentPage$ | async }}</strong> of
-        <strong>{{ totalPages() }}</strong>
-      </span>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div
+        *ngFor="let event of events"
+        class="p-card p-4 bg-white shadow-lg rounded-lg"
+      >
+        <h3 class="text-lg font-semibold">{{ event.title }}</h3>
+        <p class="text-sm text-gray-500">{{ event.date | date }}</p>
+        <p class="text-sm text-gray-600">{{ event.location }}</p>
 
-      <div class="flex items-center space-x-2">
-        <!-- Previous Button -->
-        <button
-          pButton
-          (click)="prevPage()"
-          [disabled]="!(currentPage$.value > 1)"
-          class="p-button-outlined p-button-sm px-4 py-2 rounded-lg disabled:opacity-50 transition"
-        >
-          Prev
-        </button>
-
-        <!-- Page Numbers -->
-        <div class="flex space-x-1">
-          <button
-            *ngFor="let page of [].constructor(totalPages()); let i = index"
-            (click)="setPage(i + 1)"
-            [class.bg-[#7848f4]]="currentPage$.value === i + 1"
-            [class.text-white]="currentPage$.value === i + 1"
-            class="px-3 py-2 text-sm rounded-lg border border-gray-300 hover:bg-[#7848f4] hover:text-white transition"
-          >
-            {{ i + 1 }}
-          </button>
+        <div class="mt-4 flex space-x-2">
+          <p-button
+            label="Edit"
+            icon="pi pi-pencil"
+            styleClass="p-button-warning"
+            (click)="editEvent(event)"
+          ></p-button>
+          <p-button
+            label="Delete"
+            icon="pi pi-trash"
+            styleClass="p-button-danger"
+            (click)="deleteEvent(event)"
+          ></p-button>
         </div>
-
-        <!-- Next Button -->
-        <button
-          pButton
-          (click)="nextPage()"
-          [disabled]="!(currentPage$.value < totalPages())"
-          class="p-button-outlined p-button-sm px-4 py-2 rounded-lg disabled:opacity-50 transition"
-        >
-          Next
-        </button>
       </div>
     </div>
 
-    }
+    <div class="flex justify-center items-center mt-5">
+      <p-button
+        icon="pi pi-refresh"
+        label="More"
+        (click)="loadMore()"
+        [class.d-none]="totalPages() >= currentPage()"
+      ></p-button>
+    </div>
   </div>
+  }@else {
+  <p>No events right now</p>
+  }
 </div>
 
-<!-- Dialog -->
 <p-dialog
-  [(visible)]="visible"
+  [(visible)]="editDialogVisible"
+  modal
+  [header]="'Edit Event'"
   [style]="{ width: '90vw', maxWidth: '600px' }"
   [modal]="true"
   [responsive]="true"
   [breakpoints]="{ '960px': '75vw', '640px': '90vw' }"
-  header="Create Event"
-  (onHide)="onDialogHide()"
-  styleClass="h-full"
 >
-  <form [formGroup]="eventForm" (ngSubmit)="onCreateEvent()">
+  <form [formGroup]="editEventForm" (ngSubmit)="onEditEvent()">
     <!-- Title -->
     <div class="mb-4">
       <label class="block text-gray-600">Title</label>
       <input
-        pInputText
         formControlName="title"
         class="w-full"
+        pInputText
         placeholder="Enter event title"
       />
       <small
         *ngIf="
-          eventForm.get('title')?.hasError('required') &&
-          eventForm.get('title')?.touched
+          editEventForm.get('title')?.hasError('required') &&
+          editEventForm.get('title')?.touched
         "
         class="text-red-500"
         >Title is required</small
@@ -260,15 +200,15 @@
     <div class="mb-4">
       <label class="block text-gray-600">Description</label>
       <textarea
-        pTextarea
         formControlName="description"
         class="w-full"
+        pTextarea
         placeholder="Enter event description"
       ></textarea>
       <small
         *ngIf="
-          eventForm.get('description')?.hasError('required') &&
-          eventForm.get('description')?.touched
+          editEventForm.get('description')?.hasError('required') &&
+          editEventForm.get('description')?.touched
         "
         class="text-red-500"
         >Description is required</small
@@ -279,15 +219,15 @@
     <div class="mb-4">
       <label class="block text-gray-600">Location</label>
       <input
-        pInputText
         formControlName="location"
         class="w-full"
+        pInputText
         placeholder="Enter event location"
       />
       <small
         *ngIf="
-          eventForm.get('location')?.hasError('required') &&
-          eventForm.get('location')?.touched
+          editEventForm.get('location')?.hasError('required') &&
+          editEventForm.get('location')?.touched
         "
         class="text-red-500"
         >Location is required</small
@@ -305,38 +245,20 @@
       ></p-calendar>
       <small
         *ngIf="
-          eventForm.get('date')?.hasError('required') &&
-          eventForm.get('date')?.touched
+          editEventForm.get('date')?.hasError('required') &&
+          editEventForm.get('date')?.touched
         "
         class="text-red-500"
         >Date is required</small
       >
     </div>
 
-    <!-- Participants -->
-
-    @let users = users$ | async;
-    <div class="mb-4">
-      <label class="block text-gray-600">Add Participants (Emails)</label>
-      @if(users){
-      <p-multiSelect
-        [options]="users"
-        formControlName="participants"
-        optionLabel="email"
-        placeholder="Select participants"
-        styleClass="w-full"
-      ></p-multiSelect>
-      }@else{
-      <p>Loading participants ...</p>
-      }
-    </div>
-
     <!-- Submit Button -->
     <p-button
       type="submit"
-      label="Create Event"
+      label="Save Changes"
       class="p-button-primary w-full"
-      [disabled]="eventForm.invalid"
+      [disabled]="editEventForm.invalid"
     ></p-button>
   </form>
 </p-dialog>

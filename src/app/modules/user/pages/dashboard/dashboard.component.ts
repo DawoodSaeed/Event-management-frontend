@@ -33,15 +33,8 @@ import { MultiSelectModule } from 'primeng/multiselect';
 import { TextareaModule } from 'primeng/textarea';
 import { ReactiveFormsModule } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
-
-interface EventParams {
-  page?: number;
-  limit?: number;
-  search?: string;
-  location?: string;
-  startDate?: string; // Format: "YYYY-MM-DD"
-  endDate?: string;
-}
+import { RouterLink } from '@angular/router';
+import { EventParams } from '../../../../models/event.model';
 
 interface EventI {
   title: string;
@@ -67,6 +60,7 @@ interface EventI {
     MultiSelectModule,
     TextareaModule,
     ReactiveFormsModule,
+    RouterLink,
   ],
 })
 export class DashboardComponent implements OnInit {
