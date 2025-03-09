@@ -22,6 +22,24 @@ export interface EventListResponse {
   events: Event[];
 }
 
+export interface EventCreation {
+  _id: string;
+  title: string;
+  description: string;
+  location: string;
+  date: string;
+  createdBy: string;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+  __v: number;
+}
+
+export interface EventCreationResponse {
+  message: string;
+  event: Event;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -49,5 +67,12 @@ export class EventService {
 
   deleteEvent(eventId: string) {
     return this.http.delete(`${this.apiUrl}/events/${eventId}`);
+  }
+
+  createEvent(eventData: any) {
+    return this.http.post<EventCreationResponse>(
+      `${this.apiUrl}/events`,
+      eventData
+    );
   }
 }

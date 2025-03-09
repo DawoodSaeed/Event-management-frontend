@@ -1,193 +1,335 @@
-<div
-  style="background-image: url('/assets/images/dashboard-bg.svg')"
-  class="bg-cover bg-center h-120 w-full rounded-xl p-4 md:p-6 lg:p-8 relative"
->
-  <h1
-    class="text-white text-4xl md:text-5xl lg:text-6xl uppercase font-bold text-center mx-auto"
-  >
-    Made for those who do
-  </h1>
-
-  <!-- Filters -->
-  <div
-    class="flex flex-col w-[90%] sm:flex-row gap-4 mb-4 absolute bottom-[-50px] bg-[#10107B] h-auto sm:h-[144px] items-center px-5 rounded-xl right-[50%] transform translate-x-1/2"
-    style="background-color: #10107b"
-  >
-    <!-- Search by Title -->
-    <div class="w-full sm:w-auto">
-      <label for="title" class="text-white">Looking for </label>
-      <input
-        id="title"
-        pInputText
-        type="text"
-        placeholder="Search by title or description..."
-        (input)="searchTitleOrDescription($event)"
-        class="w-full h-10 mt-2"
-      />
+<div class="container mx-auto">
+  <div class="flex justify-between px-6 h-15 items-center">
+    <div>
+      <h2 class="text-2xl font-bold text-center">
+        <span class="text-gray-900">Event</span>
+        <span class="text-purple-600"> Hive</span>
+      </h2>
     </div>
 
-    <!-- Search by Location -->
-    <div class="w-full sm:w-auto">
-      <label for="location" class="text-white">Location</label>
-      <input
-        pInputText
-        type="text"
-        placeholder="Search by location..."
-        (input)="searchByLocation($event)"
-        class="w-full h-10 mt-2"
-        id="location"
-      />
-    </div>
+    <div>
+      <p-button
+        label="Create Event"
+        icon="pi pi-plus"
+        (click)="showDialog()"
+      ></p-button>
 
-    <!-- Start Date -->
-    <div class="w-full sm:w-auto">
-      <label for="startDate" class="text-white">Start Date</label>
-      <input
-        pInputText
-        type="date"
-        (change)="searchByStartDate($event, 'startDate')"
-        class="w-full h-10 mt-2"
-        id="startDate"
-      />
-    </div>
-
-    <!-- End Date -->
-    <div class="w-full sm:w-auto">
-      <label for="endDate" class="text-white">End Date</label>
-      <input
-        pInputText
-        type="date"
-        (change)="searchByStartDate($event, 'endDate')"
-        class="w-full h-10 mt-2"
-        id="endDate"
-      />
-    </div>
-
-    <!-- Reset Filters Button -->
-    <div class="w-full sm:w-auto flex justify-start sm:justify-end">
-      <div class="hidden sm:block">
-        <button
-          pButton
-          type="button"
-          label=""
-          icon="pi pi-refresh"
-          (click)="resetFilters()"
-          class="w-full mt-4 lg:mt-7"
-        ></button>
-      </div>
-      <div class="sm:hidden">
-        <button
-          pButton
-          type="button"
-          label="Reset"
-          icon="pi pi-refresh"
-          (click)="resetFilters()"
-          class="w-full mt-4"
-        ></button>
-      </div>
+      <p-button
+        label="Logout"
+        icon="pi pi-sign-out"
+        class="ml-10"
+        (click)="logout()"
+      ></p-button>
     </div>
   </div>
-</div>
 
-<div class="p-4 md:p-6 lg:p-8">
-  @if (events$ | async; as events) {
-  <!-- Event List -->
-  <div class="overflow-x-auto mt-8">
-    <h2 class="text-2xl font-bold">
-      <span class="text-gray-900">Upcoming</span>
-      <span class="text-purple-600"> Events</span>
-    </h2>
-
-    <!-- PrimeNG Table -->
-    <p-table
-      [value]="events"
-      [paginator]="false"
-      [loading]="loading()"
-      [sortMode]="'multiple'"
+  <div
+    style="background-image: url('/assets/images/dashboard-bg.svg')"
+    class="bg-cover bg-center h-120 w-full rounded-xl p-4 md:p-6 lg:p-8 relative"
+  >
+    <h1
+      class="text-white text-4xl md:text-5xl lg:text-6xl uppercase font-bold text-center mx-auto"
     >
-      <ng-template pTemplate="header">
-        <tr>
-          <th pSortableColumn="title">
-            Title <p-sortIcon field="title"></p-sortIcon>
-          </th>
-          <th pSortableColumn="description">
-            Description <p-sortIcon field="description"></p-sortIcon>
-          </th>
-          <th pSortableColumn="location">
-            Location <p-sortIcon field="location"></p-sortIcon>
-          </th>
-          <th pSortableColumn="date">
-            Date <p-sortIcon field="date"></p-sortIcon>
-          </th>
-          <th pSortableColumn="status">
-            Status <p-sortIcon field="status"></p-sortIcon>
-          </th>
-        </tr>
-      </ng-template>
+      Made for those who do
+    </h1>
 
-      <ng-template pTemplate="body" let-event>
-        <tr>
-          <td>{{ event.title }}</td>
-          <td>{{ event.description }}</td>
-          <td>{{ event.location }}</td>
-          <td>{{ event.date | date : "medium" }}</td>
-          <td>{{ event.status }}</td>
-        </tr>
-      </ng-template>
-
-      <ng-template pTemplate="emptymessage">
-        <tr>
-          <td colspan="5">No events found</td>
-        </tr>
-      </ng-template>
-    </p-table>
-  </div>
-
-  <!-- Pagination -->
-  <div
-    class="flex flex-col justify-between mt-5 items-center space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2"
-  >
-    <!-- Showing current page / total pages -->
-    <span class="text-gray-600 text-sm">
-      Page {{ currentPage$ | async }} of {{ totalPages() }}
-    </span>
-
+    <!-- Filters -->
     <div
-      class="flex flex-col mt-5 items-center space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2"
+      class="flex flex-col w-[90%] sm:flex-row gap-4 mb-4 absolute bottom-[-50px] bg-[#10107B] h-auto sm:h-[144px] items-center px-5 rounded-xl right-[50%] transform translate-x-1/2"
+      style="background-color: #10107b"
     >
-      <!-- Previous Button -->
-      <button
-        pButton
-        (click)="prevPage()"
-        [disabled]="!(this.currentPage$.value > 1)"
-        class="p-button-outlined p-button-sm"
-      >
-        Prev
-      </button>
+      <!-- Search by Title -->
+      <div class="w-full sm:w-auto">
+        <label for="title" class="text-white">Looking for </label>
+        <input
+          id="title"
+          pInputText
+          type="text"
+          placeholder="Search by title or description..."
+          (input)="searchTitleOrDescription($event)"
+          class="w-full h-10 mt-2"
+        />
+      </div>
 
-      <!-- Numbered Page Buttons -->
-      <div class="flex space-x-1">
+      <!-- Search by Location -->
+      <div class="w-full sm:w-auto">
+        <label for="location" class="text-white">Location</label>
+        <input
+          pInputText
+          type="text"
+          placeholder="Search by location..."
+          (input)="searchByLocation($event)"
+          class="w-full h-10 mt-2"
+          id="location"
+        />
+      </div>
+
+      <!-- Start Date -->
+      <div class="w-full sm:w-auto">
+        <label for="startDate" class="text-white">Start Date</label>
+        <input
+          pInputText
+          type="date"
+          (change)="searchByStartDate($event, 'startDate')"
+          class="w-full h-10 mt-2"
+          id="startDate"
+        />
+      </div>
+
+      <!-- End Date -->
+      <div class="w-full sm:w-auto">
+        <label for="endDate" class="text-white">End Date</label>
+        <input
+          pInputText
+          type="date"
+          (change)="searchByStartDate($event, 'endDate')"
+          class="w-full h-10 mt-2"
+          id="endDate"
+        />
+      </div>
+
+      <!-- Reset Filters Button -->
+      <div class="w-full sm:w-auto flex justify-start sm:justify-end">
+        <div class="hidden sm:block">
+          <button
+            pButton
+            type="button"
+            label=""
+            icon="pi pi-refresh"
+            (click)="resetFilters()"
+            class="w-full mt-4 lg:mt-7"
+          ></button>
+        </div>
+        <div class="sm:hidden">
+          <button
+            pButton
+            type="button"
+            label="Reset"
+            icon="pi pi-refresh"
+            (click)="resetFilters()"
+            class="w-full mt-4"
+          ></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="p-4 md:p-6 lg:p-8">
+    @if (events$ | async; as events) {
+    <!-- Event List -->
+    <div class="overflow-x-auto mt-8">
+      <h2 class="text-2xl font-bold">
+        <span class="text-gray-900">Upcoming</span>
+        <span class="text-purple-600"> Events</span>
+      </h2>
+
+      <!-- PrimeNG Table -->
+      <p-table
+        [value]="events"
+        [paginator]="false"
+        [loading]="loading()"
+        [sortMode]="'multiple'"
+      >
+        <ng-template pTemplate="header">
+          <tr>
+            <th pSortableColumn="title">
+              Title <p-sortIcon field="title"></p-sortIcon>
+            </th>
+            <th pSortableColumn="description">
+              Description <p-sortIcon field="description"></p-sortIcon>
+            </th>
+            <th pSortableColumn="location">
+              Location <p-sortIcon field="location"></p-sortIcon>
+            </th>
+            <th pSortableColumn="date">
+              Date <p-sortIcon field="date"></p-sortIcon>
+            </th>
+            <th pSortableColumn="status">
+              Status <p-sortIcon field="status"></p-sortIcon>
+            </th>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="body" let-event>
+          <tr>
+            <td>{{ event.title }}</td>
+            <td>{{ event.description }}</td>
+            <td>{{ event.location }}</td>
+            <td>{{ event.date | date : "medium" }}</td>
+            <td>{{ event.status }}</td>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="5">No events found</td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </div>
+
+    <!-- Pagination -->
+    <div
+      class="flex flex-col sm:flex-row justify-between items-center mt-5 space-y-3 sm:space-y-0"
+    >
+      <!-- Showing current page / total pages -->
+      <span class="text-gray-600 text-sm">
+        Page <strong>{{ currentPage$ | async }}</strong> of
+        <strong>{{ totalPages() }}</strong>
+      </span>
+
+      <div class="flex items-center space-x-2">
+        <!-- Previous Button -->
         <button
-          *ngFor="let page of [].constructor(totalPages()); let i = index"
-          (click)="setPage(i + 1)"
-          [class.bg-[#7848f4]]="currentPage$.value === i + 1"
-          [class.text-white]="currentPage$.value === i + 1"
-          class="px-4 py-2 rounded-full text-sm hover:opacity-[0.7] transition-colors"
+          pButton
+          (click)="prevPage()"
+          [disabled]="!(currentPage$.value > 1)"
+          class="p-button-outlined p-button-sm px-4 py-2 rounded-lg disabled:opacity-50 transition"
         >
-          {{ i + 1 }}
+          Prev
+        </button>
+
+        <!-- Page Numbers -->
+        <div class="flex space-x-1">
+          <button
+            *ngFor="let page of [].constructor(totalPages()); let i = index"
+            (click)="setPage(i + 1)"
+            [class.bg-[#7848f4]]="currentPage$.value === i + 1"
+            [class.text-white]="currentPage$.value === i + 1"
+            class="px-3 py-2 text-sm rounded-lg border border-gray-300 hover:bg-[#7848f4] hover:text-white transition"
+          >
+            {{ i + 1 }}
+          </button>
+        </div>
+
+        <!-- Next Button -->
+        <button
+          pButton
+          (click)="nextPage()"
+          [disabled]="!(currentPage$.value < totalPages())"
+          class="p-button-outlined p-button-sm px-4 py-2 rounded-lg disabled:opacity-50 transition"
+        >
+          Next
         </button>
       </div>
-
-      <!-- Next Button -->
-      <button
-        pButton
-        (click)="nextPage()"
-        [disabled]="!(this.currentPage$.value < this.totalPages())"
-        class="p-button-outlined p-button-sm"
-      >
-        Next
-      </button>
     </div>
+
+    }
   </div>
-  }
 </div>
+
+<!-- Dialog -->
+<p-dialog
+  [(visible)]="visible"
+  [style]="{ width: '90vw', maxWidth: '600px' }"
+  [modal]="true"
+  [responsive]="true"
+  [breakpoints]="{ '960px': '75vw', '640px': '90vw' }"
+  header="Create Event"
+  (onHide)="onDialogHide()"
+  styleClass="h-full"
+>
+  <form [formGroup]="eventForm" (ngSubmit)="onCreateEvent()">
+    <!-- Title -->
+    <div class="mb-4">
+      <label class="block text-gray-600">Title</label>
+      <input
+        pInputText
+        formControlName="title"
+        class="w-full"
+        placeholder="Enter event title"
+      />
+      <small
+        *ngIf="
+          eventForm.get('title')?.hasError('required') &&
+          eventForm.get('title')?.touched
+        "
+        class="text-red-500"
+        >Title is required</small
+      >
+    </div>
+
+    <!-- Description -->
+    <div class="mb-4">
+      <label class="block text-gray-600">Description</label>
+      <textarea
+        pTextarea
+        formControlName="description"
+        class="w-full"
+        placeholder="Enter event description"
+      ></textarea>
+      <small
+        *ngIf="
+          eventForm.get('description')?.hasError('required') &&
+          eventForm.get('description')?.touched
+        "
+        class="text-red-500"
+        >Description is required</small
+      >
+    </div>
+
+    <!-- Location -->
+    <div class="mb-4">
+      <label class="block text-gray-600">Location</label>
+      <input
+        pInputText
+        formControlName="location"
+        class="w-full"
+        placeholder="Enter event location"
+      />
+      <small
+        *ngIf="
+          eventForm.get('location')?.hasError('required') &&
+          eventForm.get('location')?.touched
+        "
+        class="text-red-500"
+        >Location is required</small
+      >
+    </div>
+
+    <!-- Date -->
+    <div class="mb-4">
+      <label class="block text-gray-600">Date</label>
+      <p-calendar
+        formControlName="date"
+        styleClass="w-full"
+        [showTime]="true"
+        placeholder="Select event date"
+      ></p-calendar>
+      <small
+        *ngIf="
+          eventForm.get('date')?.hasError('required') &&
+          eventForm.get('date')?.touched
+        "
+        class="text-red-500"
+        >Date is required</small
+      >
+    </div>
+
+    <!-- Participants -->
+
+    @let users = users$ | async;
+    <div class="mb-4">
+      <label class="block text-gray-600">Add Participants (Emails)</label>
+      @if(users){
+      <p-multiSelect
+        [options]="users"
+        formControlName="participants"
+        optionLabel="email"
+        placeholder="Select participants"
+        styleClass="w-full"
+      ></p-multiSelect>
+      }@else{
+      <p>Loading participants ...</p>
+      }
+    </div>
+
+    <!-- Submit Button -->
+    <p-button
+      type="submit"
+      label="Create Event"
+      class="p-button-primary w-full"
+      [disabled]="eventForm.invalid"
+    ></p-button>
+  </form>
+</p-dialog>

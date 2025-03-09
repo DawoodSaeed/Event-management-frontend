@@ -1,4 +1,4 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { AuthService } from '../../../../services/auth.service';
 import {
   EventListResponse,
@@ -7,7 +7,12 @@ import {
 import { DropdownModule } from 'primeng/dropdown';
 import { CommonModule } from '@angular/common';
 import { ButtonModule } from 'primeng/button';
-import { FormsModule } from '@angular/forms';
+import {
+  FormBuilder,
+  FormGroup,
+  FormsModule,
+  Validators,
+} from '@angular/forms';
 import {
   BehaviorSubject,
   debounceTime,
@@ -21,6 +26,13 @@ import {
 import { LazyLoadEvent } from 'primeng/api';
 import { TableLazyLoadEvent, TableModule, TablePageEvent } from 'primeng/table';
 import { InputTextModule } from 'primeng/inputtext';
+import { DialogModule } from 'primeng/dialog';
+import { User, UserService } from '../../../../services/user.service';
+import { CalendarModule } from 'primeng/calendar';
+import { MultiSelectModule } from 'primeng/multiselect';
+import { TextareaModule } from 'primeng/textarea';
+import { ReactiveFormsModule } from '@angular/forms';
+import { ToastrService } from 'ngx-toastr';
 
 interface EventParams {
   page?: number;
@@ -29,6 +41,14 @@ interface EventParams {
   location?: string;
   startDate?: string; // Format: "YYYY-MM-DD"
   endDate?: string;
+}
+
+interface EventI {
+  title: string;
+  description: string;
+  location: string;
+  date: string;
+  participants: string[]; // Assuming participants are stored as an array of names or IDs
 }
 
 @Component({
@@ -42,6 +62,11 @@ interface EventParams {
     FormsModule,
     TableModule,
     InputTextModule,
+    DialogModule,
+    CalendarModule,
+    MultiSelectModule,
+    TextareaModule,
+    ReactiveFormsModule,
   ],
 })
 export class DashboardComponent implements OnInit {
@@ -53,7 +78,7 @@ export class DashboardComponent implements OnInit {
   loading = signal(true);
   pageSize: number = 5;
   currentPage = signal(1);
-
+  private toastr = inject(ToastrService);
   // Filters
   searchQuery: string = '';
   locationFilter: string = '';
@@ -69,10 +94,26 @@ export class DashboardComponent implements OnInit {
   ];
   selectedFilter = 'all';
 
+  // Event creation
+  eventForm!: FormGroup;
+  users$!: Observable<User[]>;
+  selectedParticipants: any[] = [];
+  visible: boolean = false;
+
   constructor(
     private eventService: EventService,
-    private authService: AuthService
-  ) {}
+    private authService: AuthService,
+    private userService: UserService,
+    private fb: FormBuilder
+  ) {
+    this.eventForm = this.fb.group({
+      title: ['', Validators.required],
+      description: ['', Validators.required],
+      location: ['', Validators.required],
+      date: ['', Validators.required],
+      participants: [[]],
+    });
+  }
 
   ngOnInit() {
     // Emit initial params to trigger the first load
@@ -98,6 +139,10 @@ export class DashboardComponent implements OnInit {
       map((eventsObj) => eventsObj.events),
       tap(() => this.loading.set(false))
     );
+
+    this.users$ = this.userService
+      .getAllUsers()
+      .pipe(map((data) => data.users));
   }
 
   // filterEvents() {
@@ -283,5 +328,59 @@ export class DashboardComponent implements OnInit {
 
   resetFilters() {
     this.params$.next({});
+  }
+
+  logout() {
+    this.authService.logout();
+  }
+
+  // create event #######################
+
+  // Open the dialog
+  showDialog() {
+    this.visible = true;
+  }
+
+  // Close the dialog
+  onDialogHide() {
+    this.visible = false;
+    this.eventForm.reset(); // Reset the form
+  }
+  // Reset the form
+
+  // Handle form submission
+  onCreateEvent() {
+    if (this.eventForm.invalid) {
+      // Mark all fields as touched to display validation errors
+      this.eventForm.markAllAsTouched();
+      return;
+    }
+
+    const eventData = {
+      ...this.eventForm.value,
+      participants: this.eventForm.value.participants.map(
+        (user: any) => user._id
+      ),
+    };
+
+    this.eventService.createEvent(eventData).subscribe({
+      next: (eventResponse) => {
+        this.toastr.success(
+          `Event: ${eventResponse.event.title} is created successfuly`,
+          'Event Created'
+        );
+        this.visible = false; // Close the dialog
+        this.eventForm.reset(); // Reset the form
+        this.params$.next({});
+      },
+      error: (err) => {
+        this.toastr.error(
+          "Event can't be created at the moment.",
+          'Event Creation Failed'
+        );
+      },
+    });
+
+    console.log(eventData);
   }
 }
